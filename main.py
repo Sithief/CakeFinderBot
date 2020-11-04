@@ -50,11 +50,11 @@ def help_command(update: Update, context: CallbackContext) -> None:
 def get_token():
     config = configparser.ConfigParser()
     config.read('config.ini')
-    token = config.get('BOT', 'token')
+    token = config.get('BOT', 'token',fallback=None)
     if token:
         return token
     else:
-        config['BOT']['token'] = ''
+        config['BOT'] = {'token': ''}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
         return ''
@@ -64,7 +64,12 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(get_token(), use_context=True)
+    token = get_token()
+    if token:
+        updater = Updater(token, use_context=True)
+    else:
+        logger.critical('No token found!')
+        exit(0)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
