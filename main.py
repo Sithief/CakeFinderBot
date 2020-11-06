@@ -12,12 +12,14 @@ import configparser
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+from sqlighting import SQLighting
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
+db = SQLighting('db_catalog.db')
 
 def start(update: Update, context: CallbackContext) -> None:
     keyboard = [
@@ -42,6 +44,9 @@ def button(update: Update, context: CallbackContext) -> None:
 
     query.edit_message_text(text="Selected option: {}".format(query.data))
 
+    # Пока не придумал как добавлять данные при помощи API телеграмма, поэтому для теста вручную добавлял
+def addproduct(update: Update, context: CallbackContext) -> None:
+    db.add_product(888, 'Cake', 'composition', 0, 100, True)
 
 def help_command(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Use /start to test this bot.")
@@ -74,6 +79,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
+    updater.dispatcher.add_handler(CommandHandler('addproduct', addproduct))
 
     # Start the Bot
     updater.start_polling()
